@@ -5,10 +5,8 @@ Multi-purpose IRC Bot.
 ## Features
 * Configuration file.
 * Control List.
-** Users that have full access to the bot    
-* Channel Access List: Users that can control.
-** Per channel user access
-** Per user mode (e.g. +v/+o) user access
+* Per channel user access
+* Per user mode (e.g. +v/+o) user access
 
 ## Copyright
 
