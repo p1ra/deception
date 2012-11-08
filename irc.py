@@ -86,12 +86,12 @@ def pong(s,cmd):
         return False
 
 def parse_irc(s,msg):
-    match = re.match(r'.*PING :(.*)$',msg)
+    match = re.match(r'.*PING :(\S*)$',msg)
     if match != None:
         return IrcCmd("pong",None,None,[match.group(1)],True)
     
     #search for commands in the format "!command" and check origin
-    match = re.match(r':(.+)!.+@.+ PRIVMSG (.+) :!(.+)',msg)
+    match = re.match(r':(\S+)!\S+@\S+ PRIVMSG (\S+) :!(.+)',msg)
     if match != None:
         user = match.group(1)
         target = match.group(2)
