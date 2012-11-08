@@ -110,9 +110,9 @@ def parse_irc(s,msg):
 def say(s,cmd):
     ''' Send a message to channel/user  '''
     try:
-        dest = cmd.args[0]
-        msg = " ".join(cmd.args[1:])
-        s.sendall("PRIVMSG %s :%s\n" % (dest,args))
+        dest = cmd.target
+        msg = " ".join(cmd.args)
+        s.sendall("PRIVMSG %s :%s\n" % (dest,msg))
         return True
     except:
         return False
