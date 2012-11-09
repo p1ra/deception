@@ -35,24 +35,26 @@ import time
 import irc
 from config import BotConf
 
+from log import log
+
 def process_server_cmd(s,conf,cmd):
     '''
     Process a command sent by the server.
     It does not require checking for permissions.
     '''
 
-    print "[+] Command from user server: %s" % cmd.cmd
+    log.i("Command from user server: %s" % cmd.cmd)
 
     action = irc.get_server_cmd(cmd.cmd)
 
     if action == None:
-        print "[-] Command %s not found." % cmd.cmd
+        log.e("Command %s not found." % cmd.cmd)
         return
 
     result = action(s,cmd)
 
     if result == False:
-        print "[-] Unable to send response ('%s') to server." % cmd.cmd
+        log.e("Unable to send response ('%s') to server." % cmd.cmd)
 
 def process_user_cmd(s,conf,cmd):
     '''
@@ -61,7 +63,7 @@ def process_user_cmd(s,conf,cmd):
     access list for the target channel.
     '''
 
-    print "[+] Command from user '%s': %s" % (cmd.user,cmd.cmd)
+    log.i("Command from user '%s': %s" % (cmd.user,cmd.cmd))
 
     channel = None
 
@@ -79,48 +81,51 @@ def process_user_cmd(s,conf,cmd):
     action = irc.get_user_cmd(cmd.cmd)
 
     if action == None:
-        print "[-] Command %s not found." % cmd.cmd
+        log.e("Command %s not found." % cmd.cmd)
         return
 
     if not irc.check_permission(cmd.cmd,access):
-        print "[-] Operation Not Permitted."
+        log.e("Operation Not Permitted.")
         return
 
     result = action(s,cmd)
 
     if result == False:
-        print "[-] Failed to send command '%s' from user '%s'." % (cmd.cmd,cmd.user)
+        log.e("Failed to send command '%s' from user '%s'." % (cmd.cmd,cmd.user))
 
 def main():  
-    print '[+] Loading configuration file "bot.conf"'
+    log.set_loglevel(2)
+    log.init_logfile(None)
+
+    log.i('Loading configuration file "bot.conf"')
 
     conf = BotConf("bot.conf")
     
-    print "[+] Connecting Bot."
-    print "[+] Server: %s" % conf.server
-    print "[+] Port  : %d" % conf.port
+    log.i("Connecting Bot.")
+    log.i("Server: %s" % conf.server)
+    log.i("Port  : %d" % conf.port)
 
     s = irc.connect(conf.server,conf.port)
 
     if s == None:
-        print "[-] ERROR: Unable to connect to server."
+        log.e("ERROR: Unable to connect to server.")
         sys.exit(0)
 
     if irc.handshake(s,conf.nick,conf.user,conf.name) == False:
-        print "[-] ERROR: Unable to perform handshake."
+        log.e("ERROR: Unable to perform handshake.")
         sys.exit(0)
     
-    print "[+] Waiting for connection to get stable..."
+    log.i("Waiting for connection to get stable...")
 
     time.sleep(10)
 
-    print "[+] Bot Connected."
+    log.i("Bot Connected.")
 
     irc.join_channels(s,conf.get_channel_list())
 
-    print "[+] Joined channels in access list."
+    log.i("Joined channels in access list.")
 
-    print "[+] Deception locked and loaded!"
+    log.i("Deception locked and loaded!")
 
     try:
         msg = s.recv(512)
@@ -130,7 +135,7 @@ def main():
             for line in msglist:
                 if len(line) == 0: continue
 
-                #print "[*] " + line
+                log.d(line)
 
                 cmd = irc.parse_irc(s,line.strip())                
                 if cmd == None: continue
@@ -141,14 +146,13 @@ def main():
                     process_user_cmd(s,conf,cmd)
 
             msg = s.recv(512)
-    except:
-        pass
+    except Exception as e:
+        log.e(repr(e))
 
-    print "[-] ERROR: Lost connection to the server."
+    log.e("ERROR: Lost connection to the server.")
 
     if s != None: s.close()
 
 #Run
 if __name__ == "__main__":
     main()
-

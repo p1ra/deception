@@ -24,6 +24,8 @@ Config file management.
 import os
 import ConfigParser
 
+from log import log
+
 class BotConf:
     ''' Holds the bot configuration '''
     server = "localhost"
@@ -72,7 +74,9 @@ class BotConf:
                         acl[item[0]] = item[1]
 
                     self.channels[channel] = acl
-        except:
+
+        except Exception as e:
+            log.e(repr(e))
             return False
 
         return True
@@ -97,7 +101,8 @@ class BotConf:
             f = open(path,'w')
             conf.write(f)
             f.close()
-        except:
+        except Exception as e:
+            log.e(repr(e))
             return False
 
         return True
