@@ -24,6 +24,8 @@ IRC and Bot commands.
 import socket
 import re
 
+import traceback
+
 from log import log
 
 #----------------------
@@ -50,7 +52,7 @@ def connect(server,port):
         s.connect((server,port))
         return s
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         s.close()
         return None
 
@@ -61,7 +63,7 @@ def handshake(s,nick,user,name):
         s.sendall("USER %s 0 * :%s\n" % (user,name))
         return True
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 def join_channels(s,channel_list):
@@ -71,7 +73,7 @@ def join_channels(s,channel_list):
             s.sendall("JOIN %s\n" % channel)
         return True
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 def disconnect(s,cmd=None):
@@ -81,7 +83,7 @@ def disconnect(s,cmd=None):
         s.close()
         return True
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 def pong(s,cmd):
@@ -89,7 +91,7 @@ def pong(s,cmd):
     try:
         s.sendall("PONG : %s\r\n" % cmd.args[0])
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 def parse_irc(s,msg):
@@ -122,7 +124,7 @@ def say(s,cmd):
         s.sendall("PRIVMSG %s :%s\n" % (dest,msg))
         return True
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 def join(s,cmd):
@@ -132,7 +134,7 @@ def join(s,cmd):
         s.sendall("JOIN %s\n" % channel)
         return True
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 def part(s,cmd):
@@ -142,7 +144,7 @@ def part(s,cmd):
         s.sendall("PART %s\n" % channel)
         return True
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 
@@ -154,7 +156,7 @@ def mode(s,cmd):
         s.sendall("MODE %s %s %s\n" % (cmd.target,mode,user))
         return True
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 def op(s,cmd):
@@ -184,7 +186,7 @@ def kick(s,cmd):
         s.sendall("KICK %s %s\n" % (cmd.target,user))
         return True
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
         return False
 
 '''

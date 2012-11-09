@@ -76,7 +76,7 @@ class BotConf:
                     self.channels[channel] = acl
 
         except Exception as e:
-            log.e(repr(e))
+            log.e(traceback.format_exc())            
             return False
 
         return True
@@ -102,7 +102,7 @@ class BotConf:
             conf.write(f)
             f.close()
         except Exception as e:
-            log.e(repr(e))
+            log.e(traceback.format_exc())
             return False
 
         return True
@@ -187,15 +187,15 @@ class BotConf:
     def get_access_level(self,chan,user):
         ''' Get access level for user in the given channel '''
         if chan == None or user == None:
-            return None
+            return -1
 
         if chan not in self.channels.iterkeys():
-            return None
+            return -1
 
         if user not in self.channels[chan].iterkeys():
-            return None
+            return -1
 
-        return self.channels[chan][user]
+        return int(self.channels[chan][user])
 
     def get_channel_list(self):
         return self.channels.iterkeys()

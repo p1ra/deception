@@ -32,6 +32,8 @@ import socket
 import sys
 import time
 
+import traceback
+
 import irc
 from config import BotConf
 
@@ -147,7 +149,7 @@ def main():
 
             msg = s.recv(512)
     except Exception as e:
-        log.e(repr(e))
+        log.e(traceback.format_exc())
 
     log.e("ERROR: Lost connection to the server.")
 
