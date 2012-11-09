@@ -13,8 +13,8 @@ class log:
             print entry
 
         if log.log_name != None:
-            with open(log.log_name,'w') as f:
-                f.write(entry)
+            with open(log.log_name,'a') as f:
+                f.write("%s\n" % entry)
 
     @staticmethod
     def e(msg):
@@ -34,7 +34,7 @@ class log:
     @staticmethod
     def init_logfile(name):
         if name == None:
-            name = "%s.log" % time.strftime("%I_%M_%S")
+            name = "%s.log" % time.strftime("%Y.%m.%d-%I.%M.%S")
         log.log_name = name
 
     @staticmethod
