@@ -71,7 +71,7 @@ def process_user_cmd(s,conf,cmd):
 
     if cmd.target.find("#") == 0:
         channel = cmd.target
-    elif cmd.args[0] != None and cmd.args[0].find('#') == 0:
+    elif len(cmd.args) != 0 and cmd.args[0].find('#') == 0:
         channel = cmd.args[0]
 
     access = -1
@@ -142,6 +142,8 @@ def main():
                 cmd = irc.parse_irc(s,line.strip())                
                 if cmd == None: continue
 
+                log.d(cmd);
+
                 if cmd.server_cmd:
                     process_server_cmd(s,conf,cmd)
                 else:
@@ -151,7 +153,7 @@ def main():
     except Exception as e:
         log.e(traceback.format_exc())
 
-    log.e("ERROR: Lost connection to the server.")
+    log.e("Lost connection to the server.")
 
     if s != None: s.close()
 

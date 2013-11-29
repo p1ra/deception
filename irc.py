@@ -81,7 +81,8 @@ def disconnect(s,cmd=None):
     try:
         s.sendall("QUIT :\n")
         s.close()
-        return True
+        log.i("Exiting")
+        exit(0)
     except Exception as e:
         log.e(traceback.format_exc())
         return False
@@ -118,9 +119,17 @@ def parse_irc(s,msg):
 
 def say(s,cmd):
     ''' Send a message to channel/user  '''
-    try:
+    if len(cmd.args) != 0 and cmd.args[0].find('#') == 0:
+        dest = cmd.args[0]
+        msg = " ".join(cmd.args[1:])
+    elif cmd.target.find('#') == 0:
         dest = cmd.target
         msg = " ".join(cmd.args)
+    else:
+        dest = cmd.user
+        msg = " ".join(cmd.args)
+
+    try:
         s.sendall("PRIVMSG %s :%s\n" % (dest,msg))
         return True
     except Exception as e:
@@ -139,8 +148,14 @@ def join(s,cmd):
 
 def part(s,cmd):
     ''' Part from channel  '''
-    try:
+    if len(cmd.args) != 0 and cmd.args[0].find('#') == 0:
         channel = cmd.args[0]
+    elif cmd.target.find('#') == 0:
+        channel = cmd.target
+    else:
+        return False
+
+    try:
         s.sendall("PART %s\n" % channel)
         return True
     except Exception as e:

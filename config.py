@@ -250,3 +250,7 @@ def __auto_test():
     bot.load("bot.conf")
 
     print "[+] Auto testing done."
+
+if __name__ == "__main__":
+    __auto_test()
+
