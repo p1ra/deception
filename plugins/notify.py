@@ -17,7 +17,7 @@
 '''
 Deception IRC Bot - by p1ra <p1ra@smashthestack.org>
 
-Basic Bot functions
+Notify bot error via PRIVMSG
 
 '''
 
