@@ -2,6 +2,7 @@
 
 import sys
 import time
+import os
 
 class log:
     log_name = None
@@ -18,7 +19,7 @@ class log:
 
     @staticmethod
     def e(msg):
-        entry = "[!][%s] %s" % (time.strftime("%I:%M.%S"), msg)
+        entry = "[%s][!] %s" % (time.strftime("%I:%M.%S"), msg)
         log._log(entry,0)
 
     @staticmethod
@@ -28,13 +29,19 @@ class log:
 
     @staticmethod
     def d(msg):
-        entry = "[*][%s] %s" % (time.strftime("%I:%M.%S"), msg)
+        entry = "[%s][*] %s" % (time.strftime("%I:%M.%S"), msg)
         log._log(entry,2)
 
     @staticmethod
-    def init_logfile(name):
-        if name == None:
-            name = "log/%s.log" % time.strftime("%Y.%m.%d-%I.%M.%S")
+    def init_logfile(dirname=None):
+        name = "%s.log" % time.strftime("%Y.%m.%d-%I.%M.%S")
+
+        if dirname != None:
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+
+            name = "%s/%s" % (dirname, name)
+
         log.log_name = name
 
     @staticmethod

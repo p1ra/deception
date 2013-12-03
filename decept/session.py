@@ -58,9 +58,6 @@ class IrcSession:
         self.connected = False
         self.socket = None
 
-        self.post_connect_hooks = []
-        self.cmd_handlers = {}
-
     def send(self,msg):
         ''' Send wrapper to handle exceptions '''
         if self.socket == None:
@@ -86,7 +83,6 @@ class IrcSession:
             return ''
 
     #IRC Protocol messages
-
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -151,8 +147,109 @@ class IrcSession:
 
         self.send("PRIVMSG %s :%s\n" % (target, msg))
 
+    #Plugin Support
+    def on_connect(self):
+        ''' Execute plugins on connect connect hooks '''
+        for hook in self.on_connect_hooks:
+            #Try block to avoid breaking on bugged plugins
+            try:
+                hook(self)
+            except:
+                log.e("Hook %s chashed" % hook.__name__)
+                log.e(traceback.format_exc())
+
+    def on_disconnect(self):
+        ''' Execute plugins on disconnect hooks '''
+        for hook in self.on_disconnect_hooks:
+            #Try block to avoid breaking on bugged plugins
+            try:
+                hook(self)
+            except:
+                log.e("Hook %s chashed" % hook.__name__)
+                log.e(traceback.format_exc())
+
+    def on_msg_recv(self, msg):
+        ''' Execute plugins on cmd recv hooks '''
+        for hook in self.on_msg_recv_hooks:
+            #Try block to avoid breaking on bugged plugins
+            try:
+                hook(self, msg)
+            except:
+                log.e("Hook %s chashed" % hook.__name__)
+                log.e(traceback.format_exc())
+
+    def on_unknown_cmd(self, cmd):
+        ''' Execute plugins on cmd recv hooks '''
+        for hook in self.on_unknown_cmd_hooks:
+            #Try block to avoid breaking on bugged plugins
+            try:
+                hook(self, cmd)
+            except:
+                log.e("Hook %s chashed" % hook.__name__)
+                log.e(traceback.format_exc())
+
+    def on_permission_denied(self, cmd):
+        ''' Execute plugins on cmd recv hooks '''
+        for hook in self.on_permission_denied_hooks:
+            #Try block to avoid breaking on bugged plugins
+            try:
+                hook(self, cmd)
+            except:
+                log.e("Hook %s chashed" % hook.__name__)
+                log.e(traceback.format_exc())
+
+    def load_plugins(self):
+        ''' Load extra functionalities on runtime '''
+        self.on_connect_hooks = []
+        self.on_disconnect_hooks = []
+        self.on_msg_recv_hooks = []
+        self.on_unknown_cmd_hooks = []
+        self.on_permission_denied_hooks = []
+
+        self.cmd_handlers = {}
+
+        plugins = [f for f in listdir('plugins/') if f.endswith(".py") and f != "__init__.py"]
+
+        for plugin in plugins:
+            name = plugin[:-3]
+
+            log.i("Loading plugin: '%s'" % name)
+
+            try:
+                module = __import__('plugins.' + name, fromlist=["plugins"])
+                reload(module)
+
+                #Load event hooks
+                if hasattr(module, 'ON_CONNECT'):
+                    for hook in module.ON_CONNECT:
+                        self.on_connect_hooks.append(hook)
+
+                if hasattr(module, 'ON_DISCONNECT'):
+                    for hook in module.ON_DISCONNECT:
+                        self.on_disconnect_hooks.append(hook)
+
+                if hasattr(module, 'ON_MSG_RECV'):
+                    for hook in module.ON_MSG_RECV:
+                        self.on_msg_recv_hooks.append(hook)
+
+                if hasattr(module, 'ON_UNKNOWN_CMD'):
+                    for hook in module.ON_UNKNOWN_CMD:
+                        self.on_unknown_cmd_hooks.append(hook)
+
+                if hasattr(module, 'ON_PERMISSION_DENIED'):
+                    for hook in module.ON_PERMISSION_DENIED:
+                        self.on_permission_denied_hooks.append(hook)
+
+                #Load plugin commands
+                if hasattr(module, 'COMMAND_HANDLERS'):
+                    for handler in module.COMMAND_HANDLERS.keys():
+                        self.cmd_handlers[handler] = module.COMMAND_HANDLERS[handler]
+
+            except:
+                log.e("Unable to load plugin '%s'" % name)
+                log.e(traceback.format_exc())
+
     #Session Lifecycle
-    
     def parse_cmd(self,msg):
         match = re.match(r'.*PING :(\S*)$',msg)
         if match != None:
@@ -164,8 +261,8 @@ class IrcSession:
             user = match.group(1)
             target = match.group(2)
             tokens = match.group(3).split()
-            name    = tokens[0]
-            args   = tokens[1:]
+            name = tokens[0]
+            args = tokens[1:]
 
             return IrcCmd(name,user,target,args)
 
@@ -188,11 +285,6 @@ class IrcSession:
 
         return True
 
-    def post_connect(self):
-        ''' Execute plugins post connect hooks '''
-        for hook in self.post_connect_hooks:
-            hook(self)
-
     def process_cmd(self,cmd):
         ''' Execute plugins commands '''
         if cmd.name not in self.cmd_handlers.keys():
@@ -204,10 +296,15 @@ class IrcSession:
             log.e("User %s does not have enough permission for command %s" % (cmd.user, cmd.name))
             return False
         
-        result = self.cmd_handlers[cmd.name][0](self,cmd)
+        #Try block to avoid breaking on bugged plugins
+        try:
+            result = self.cmd_handlers[cmd.name][0](self,cmd)
 
-        if result == False:
-            log.e("Unable to send command response to server: '%s'" % cmd.name)
+            if result == False:
+                log.e("Unable to send command response to server: '%s'" % cmd.name)
+        except:
+            log.e("Command '%s' crashed." % cmd.name)
+            log.e(traceback.format_exc())
 
         return True
 
@@ -223,27 +320,6 @@ class IrcSession:
 
         return permission >= self.cmd_handlers[cmd.name][1]
 
-    def load_plugins(self):
-        ''' Load extra functionalities on runtime '''
-        plugins = [f for f in listdir('plugins/') if f.endswith(".py") and f != "__init__.py"]
-
-        for plugin in plugins:
-            name = plugin[:-3]
-
-            log.i("Loading plugin: '%s'" % name)
-
-            try:
-                module = __import__('plugins.' + name, fromlist=["plugins"])
-
-                for hook in getattr(module, 'POST_CONNECT'):
-                    self.post_connect_hooks.append(hook)
-
-                for handler in module.COMMAND_HANDLERS.keys():
-                    self.cmd_handlers[handler] = module.COMMAND_HANDLERS[handler]
-
-            except:
-                log.e("Unable to load plugin '%s'" % name)
-
     def run(self):
         self.load_plugins()
         log.i("Plugins Loaded.")
@@ -251,7 +327,7 @@ class IrcSession:
         self.connect()
         log.i("Bot Connected.")
 
-        self.post_connect()
+        self.on_connect()
         log.i("Deception locked and loaded!")
 
         while self.connected:
@@ -269,13 +345,24 @@ class IrcSession:
                 log.d(line)
 
                 cmd = self.parse_cmd(line.strip())
-                if cmd == None: continue
+                if cmd == None:
+                    self.on_msg_recv(line)
+                    continue
 
                 log.d(cmd);
 
                 if self.process_server_cmd(cmd):
                     continue
 
-                if not self.process_cmd(cmd):
+                if cmd.name not in self.cmd_handlers.keys():
                     log.e("Command '%s' not recognized." % cmd.name)
+                    self.on_unknown_cmd(cmd)
+                    continue
+
+                if not self.check_permission(cmd):
+                    self.on_permission_denied(cmd)
+
+                self.process_cmd(cmd)
+
+        self.on_disconnect()
 

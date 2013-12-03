@@ -30,9 +30,10 @@ Features:
 
 import sys
 import signal
-from session import IrcSession
-from config import BotConf
-from log import log
+
+from decept.session import IrcSession
+from decept.config import BotConf
+from decept.log import log
 
 def terminate(signal, frame):
     log.i("Exiting.")
@@ -42,7 +43,7 @@ def main():
     signal.signal(signal.SIGINT, terminate)
     
     log.set_loglevel(2)
-    log.init_logfile(None)
+    log.init_logfile("logs")
 
     log.i('Loading configuration file "bot.conf"')
 

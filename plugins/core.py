@@ -21,18 +21,20 @@ Basic Bot functions
 
 '''
 
-from session import IrcCmd
-
-# ------------------
-# Post Connect hooks
-# ------------------
+# -----------
+# Event hooks
+# -----------
 
 def join_channels(session):
     ''' Join all channels in the access list '''
     for channel in session.conf.channels:
         session.join(channel)
 
-POST_CONNECT = [join_channels,]
+ON_CONNECT = [join_channels,]
+ON_DISCONNECT = []
+ON_MSG_RECV = []
+ON_UNKNOWN_CMD = []
+ON_PERMISSION_DENIED = []
 
 # ----------------
 # Command Handlers
@@ -134,15 +136,22 @@ def kick(session, cmd):
 
     return True
 
+def sync(session, cmd):
+    ''' Realod Plugins '''
+    session.load_plugins()
+
+    session.privmsg(cmd.target,"Plugins synchronized.");
+
+    return True
 
 '''
 User commands.
 Format: "command_name":(command_function,permission_level)
 
 Permission Level:
-  0 : No permission required
- >0 : Channel permission level (eg. 1 for +v 2 for +o)
-  9 : Control list only
+   0 : No permission required
+ 1-8 : Channel permission levels (eg. 1 for +v 2 for +o)
+   9 : Control list only
 
 Note: The function definition and the command
       must have the same name
@@ -158,14 +167,6 @@ COMMAND_HANDLERS = {
     "voice":(voice,2),
     "devoice":(devoice,2),
     "kick":(kick,2),
+    "sync":(sync,9),
     }
-   
 
-def check_permission(cmd,permission):
-    ''' Check permission for given command '''
-    global user_commands
-
-    if cmd not in user_commands:
-        return False
-
-    return permission >= user_commands[cmd][1]
