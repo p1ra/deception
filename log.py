@@ -34,7 +34,7 @@ class log:
     @staticmethod
     def init_logfile(name):
         if name == None:
-            name = "%s.log" % time.strftime("%Y.%m.%d-%I.%M.%S")
+            name = "log/%s.log" % time.strftime("%Y.%m.%d-%I.%M.%S")
         log.log_name = name
 
     @staticmethod

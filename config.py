@@ -27,7 +27,7 @@ import ConfigParser
 from log import log
 
 class BotConf:
-    ''' Holds the bot configuration '''
+    ''' Bot configuration '''
     server = "localhost"
     port = 6667
 
@@ -37,7 +37,7 @@ class BotConf:
 
     control_list = list()
 
-    channels = {}
+    channels = {'#channel1': {'nick2': '2', 'nick1': '2'},}
 
     def __init__(self,path):   
         #use None for default
@@ -225,6 +225,8 @@ def __auto_test():
     bot.add_channel("#channel4",{})
     bot.add_channel("#channel5",None)
     bot.add_channel(None,{})
+
+    print bot.channels
 
     bot.remove_channel("#channel4")
     bot.remove_channel("#channel6")
