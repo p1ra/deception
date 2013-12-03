@@ -21,6 +21,8 @@ Basic Bot functions
 
 '''
 
+import os
+
 # -----------
 # Event hooks
 # -----------
@@ -138,9 +140,48 @@ def kick(session, cmd):
 
 def sync(session, cmd):
     ''' Realod Plugins '''
-    session.load_plugins()
+    session.load_plugin_list(True)
 
     session.privmsg(cmd.target,"Plugins synchronized.");
+
+    return True
+
+def load(session, cmd):
+    ''' Load Plugin '''
+    if len(cmd.args) == 0:
+        return False
+
+    plugin = cmd.args[0]
+
+    if not os.path.exists("plugins/%s.py" % plugin):
+        session.privmsg(cmd.target,"Plugin '%s' not found." % plugin);
+        return False
+
+    if not plugin in session.conf.plugins:
+        session.conf.plugins.append(plugin)
+
+    session.load_plugin_list(True)
+
+    session.privmsg(cmd.target,"Plugin '%s' loaded." % plugin);
+
+    return True
+
+def unload(session, cmd):
+    ''' Load Plugin '''
+    if len(cmd.args) == 0:
+        return False
+
+    plugin = cmd.args[0]
+
+    if not plugin in session.conf.plugins:
+        session.privmsg(cmd.target,"Plugin '%s' is not loaded." % plugin);
+        return False
+
+    session.conf.plugins.remove(plugin)
+
+    session.load_plugin_list(True)
+
+    session.privmsg(cmd.target,"Plugin '%s' unloaded." % plugin);
 
     return True
 
@@ -168,5 +209,7 @@ COMMAND_HANDLERS = {
     "devoice":(devoice,2),
     "kick":(kick,2),
     "sync":(sync,9),
+    "load":(load,9),
+    "unload":(unload,9),
     }
 

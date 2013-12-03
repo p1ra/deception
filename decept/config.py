@@ -21,8 +21,9 @@ Config file management.
 
 '''
 
-import os
 import ConfigParser
+import os
+import traceback
 
 from log import log
 
@@ -35,7 +36,9 @@ class BotConf:
     user = "u-decept"
     name = "n-decept"
 
-    control_list = list()
+    control_list = []
+
+    plugins = ['core','notify',]
 
     channels = {'#channel1': {'nick2': '2', 'nick1': '2'},}
 
@@ -65,6 +68,7 @@ class BotConf:
             self.nick = conf.get('General','nick')
 
             self.control_list = conf.get('General','control_list').split(',')
+            self.plugins = conf.get('General','plugins').split(',')
 
             for channel in conf.sections():                
                 if channel != 'General':
@@ -75,7 +79,7 @@ class BotConf:
 
                     self.channels[channel] = acl
 
-        except Exception as e:
+        except:
             log.e(traceback.format_exc())            
             return False
 
@@ -92,6 +96,7 @@ class BotConf:
         conf.set('General','name',self.name)
         conf.set('General','nick',self.nick)
         conf.set('General','control_list',','.join(self.control_list))
+        conf.set('General','plugins',','.join(self.plugins))
 
         for chan in self.channels.iterkeys():
             conf.add_section(chan)
@@ -101,7 +106,7 @@ class BotConf:
             f = open(path,'w')
             conf.write(f)
             f.close()
-        except Exception as e:
+        except:
             log.e(traceback.format_exc())
             return False
 
