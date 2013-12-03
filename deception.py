@@ -41,7 +41,7 @@ def terminate(signal, frame):
 def main():  
     signal.signal(signal.SIGINT, terminate)
     
-    log.set_loglevel(3)
+    log.set_loglevel(2)
     log.init_logfile(None)
 
     log.i('Loading configuration file "bot.conf"')
