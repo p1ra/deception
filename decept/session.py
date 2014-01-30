@@ -71,7 +71,7 @@ class IrcSession:
 
         try:
             if self.conf.ssl_enabled:
-                self.ssl_socket.sendall(msg)
+                self.ssl_socket.write(msg)
             else:
                 self.socket.sendall(msg)
 
@@ -91,7 +91,7 @@ class IrcSession:
         try:
             #IRC protocol uses 512 bytes as buffer size
             if self.conf.ssl_enabled:
-                return self.ssl_socket.recv(512)
+                return self.ssl_socket.read(512)
             else:
                 return self.socket.recv(512)
         except Exception as e:
