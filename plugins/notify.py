@@ -25,23 +25,25 @@ Notify bot error via PRIVMSG
 # Event hooks
 # -----------
 
+
 def notify_unknown(session, cmd):
     ''' Notify Unknown command '''
     session.privmsg(cmd.target, "Unknown command: '%s'" % cmd.name)
 
+
 def notify_denied(session, cmd):
     ''' Notify a permission check failure '''
-    session.privmsg(cmd.target, "Permission denied for command: '%s'" % cmd.name)
+    session.privmsg(cmd.target, "Permission denied for command: '%s'" %
+                    cmd.name)
 
 ON_CONNECT = []
 ON_DISCONNECT = []
 ON_MSG_RECV = []
-ON_UNKNOWN_CMD = [notify_unknown,]
-ON_PERMISSION_DENIED =[notify_denied,]
+ON_UNKNOWN_CMD = [notify_unknown, ]
+ON_PERMISSION_DENIED = [notify_denied, ]
 
 # ----------------
 # Command Handlers
 # ----------------
 
 COMMAND_HANDLERS = {}
-

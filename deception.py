@@ -35,30 +35,32 @@ from decept.session import IrcSession
 from decept.config import BotConf
 from decept.log import log
 
+
 def terminate(signal, frame):
     log.i("Exiting.")
     sys.exit(0)
 
-def main():  
+
+def main():
     signal.signal(signal.SIGINT, terminate)
-    
+
     log.set_loglevel(2)
     log.init_logfile("logs")
 
     log.i('Loading configuration file "bot.conf"')
 
     conf = BotConf("bot.conf")
-    
+
     log.i("Connecting Bot.")
     log.i("Server: %s" % conf.server)
     log.i("Port  : %d" % conf.port)
 
     session = IrcSession(conf)
-    
+
     session.run()
 
     log.i("Exiting.")
 
-#Run
+# Run
 if __name__ == "__main__":
     main()

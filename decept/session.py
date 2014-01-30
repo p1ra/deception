@@ -256,7 +256,7 @@ class IrcSession:
         match = re.match(r'.*PING :(\S*)$',msg)
         if match != None:
             return IrcCmd("pong",None,None,[match.group(1)],True)
-        
+
         #search for commands in the format "!command" and check origin
         match = re.match(r':(\S+)!\S+@\S+ PRIVMSG (\S+) :!(.+)',msg)
         if match != None:
@@ -297,7 +297,7 @@ class IrcSession:
         if not self.check_permission(cmd):
             log.e("User %s does not have enough permission for command %s" % (cmd.user, cmd.name))
             return False
-        
+
         #Try block to avoid breaking on bugged plugins
         try:
             result = self.cmd_handlers[cmd.name][0](self,cmd)

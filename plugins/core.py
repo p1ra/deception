@@ -27,12 +27,13 @@ import os
 # Event hooks
 # -----------
 
+
 def join_channels(session):
     ''' Join all channels in the access list '''
     for channel in session.conf.channels:
         session.join(channel)
 
-ON_CONNECT = [join_channels,]
+ON_CONNECT = [join_channels, ]
 ON_DISCONNECT = []
 ON_MSG_RECV = []
 ON_UNKNOWN_CMD = []
@@ -41,9 +42,12 @@ ON_PERMISSION_DENIED = []
 # ----------------
 # Command Handlers
 # ----------------
-def disconnect(session,cmd=None):
+
+
+def disconnect(session, cmd=None):
     ''' Send quit message and close socket '''
     session.disconnect()
+
 
 def say(session, cmd):
     ''' Send a message to channel/user  '''
@@ -64,6 +68,7 @@ def say(session, cmd):
 
     return True
 
+
 def join(session, cmd):
     ''' Join a channel  '''
     if len(cmd.args) != 0 and cmd.args[0].find('#') == 0:
@@ -75,6 +80,7 @@ def join(session, cmd):
 
     return True
 
+
 def part(session, cmd):
     ''' Part from channel  '''
     if len(cmd.args) != 0 and cmd.args[0].find('#') == 0:
@@ -84,9 +90,10 @@ def part(session, cmd):
     else:
         return False
 
-    session.part(channel) 
+    session.part(channel)
 
     return True
+
 
 def mode(session, cmd):
     ''' Set channel mode for user '''
@@ -96,29 +103,34 @@ def mode(session, cmd):
     user = cmd.args[0]
     mode = cmd.args[1]
 
-    session.mode(cmd.target,mode,user)
+    session.mode(cmd.target, mode, user)
 
     return True
 
+
 def op(session, cmd):
     ''' Mode wrapper for +o '''
-    cmd.args = (cmd.args[0],"+o")
+    cmd.args = (cmd.args[0], "+o")
     return mode(session, cmd)
+
 
 def deop(session, cmd):
     ''' Mode wrapper for -o '''
-    cmd.args = (cmd.args[0],"-o")
+    cmd.args = (cmd.args[0], "-o")
     return mode(session, cmd)
+
 
 def voice(session, cmd):
     ''' Mode wrapper for +v '''
-    cmd.args = (cmd.args[0],"+v")
+    cmd.args = (cmd.args[0], "+v")
     return mode(session, cmd)
+
 
 def devoice(session, cmd):
     ''' Mode wrapper for -v '''
-    cmd.args = (cmd.args[0],"-v")
+    cmd.args = (cmd.args[0], "-v")
     return mode(session, cmd)
+
 
 def kick(session, cmd):
     ''' Set channel mode for user '''
@@ -138,13 +150,15 @@ def kick(session, cmd):
 
     return True
 
+
 def sync(session, cmd):
     ''' Realod Plugins '''
     session.load_plugin_list(True)
 
-    session.privmsg(cmd.target,"Plugins synchronized.");
+    session.privmsg(cmd.target, "Plugins synchronized.")
 
     return True
+
 
 def load(session, cmd):
     ''' Load Plugin '''
@@ -154,7 +168,7 @@ def load(session, cmd):
     plugin = cmd.args[0]
 
     if not os.path.exists("plugins/%s.py" % plugin):
-        session.privmsg(cmd.target,"Plugin '%s' not found." % plugin);
+        session.privmsg(cmd.target, "Plugin '%s' not found." % plugin)
         return False
 
     if not plugin in session.conf.plugins:
@@ -162,9 +176,10 @@ def load(session, cmd):
 
     session.load_plugin_list(True)
 
-    session.privmsg(cmd.target,"Plugin '%s' loaded." % plugin);
+    session.privmsg(cmd.target, "Plugin '%s' loaded." % plugin)
 
     return True
+
 
 def unload(session, cmd):
     ''' Load Plugin '''
@@ -174,14 +189,14 @@ def unload(session, cmd):
     plugin = cmd.args[0]
 
     if not plugin in session.conf.plugins:
-        session.privmsg(cmd.target,"Plugin '%s' is not loaded." % plugin);
+        session.privmsg(cmd.target, "Plugin '%s' is not loaded." % plugin)
         return False
 
     session.conf.plugins.remove(plugin)
 
     session.load_plugin_list(True)
 
-    session.privmsg(cmd.target,"Plugin '%s' unloaded." % plugin);
+    session.privmsg(cmd.target, "Plugin '%s' unloaded." % plugin)
 
     return True
 
@@ -198,18 +213,17 @@ Note: The function definition and the command
       must have the same name
 '''
 COMMAND_HANDLERS = {
-    "disconnect":(disconnect,9),
-    "say":(say,1),
-    "join":(join,9),
-    "part":(part,9),
-    "mode":(mode,2),
-    "op":(op,2),
-    "deop":(deop,2),
-    "voice":(voice,2),
-    "devoice":(devoice,2),
-    "kick":(kick,2),
-    "sync":(sync,9),
-    "load":(load,9),
-    "unload":(unload,9),
-    }
-
+    "disconnect": (disconnect, 9),
+    "say": (say, 1),
+    "join": (join, 9),
+    "part": (part, 9),
+    "mode": (mode, 2),
+    "op": (op, 2),
+    "deop": (deop, 2),
+    "voice": (voice, 2),
+    "devoice": (devoice, 2),
+    "kick": (kick, 2),
+    "sync": (sync, 9),
+    "load": (load, 9),
+    "unload": (unload, 9),
+}
