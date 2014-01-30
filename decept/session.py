@@ -24,10 +24,12 @@ IRC and Bot commands.
 import socket
 import re
 import traceback
-from log import log
 
 from os import listdir
 
+from log import log
+
+#Remove when proper connection is implemented
 import time
 
 #----------------------
@@ -57,14 +59,22 @@ class IrcSession:
         self.conf = conf
         self.connected = False
         self.socket = None
+        self.ssl_socket = None
 
     def send(self,msg):
         ''' Send wrapper to handle exceptions '''
         if self.socket == None:
             return False
 
+        if self.conf.ssl_enabled == True and self.ssl_socket == None:
+            return False
+
         try:
-            self.socket.sendall(msg)
+            if self.conf.ssl_enabled:
+                self.ssl_socket.sendall(msg)
+            else:
+                self.socket.sendall(msg)
+
             return True
         except Exception as e:
             log.e(traceback.format_exc())
@@ -75,9 +85,15 @@ class IrcSession:
         if self.socket == None:
             return False
 
+        if self.conf.ssl_enabled == True and self.ssl_socket == None:
+            return False
+
         try:
             #IRC protocol uses 512 bytes as buffer size
-            return self.socket.recv(512)
+            if self.conf.ssl_enabled:
+                return self.ssl_socket.recv(512)
+            else:
+                return self.socket.recv(512)
         except Exception as e:
             log.e(traceback.format_exc())
             return ''
@@ -89,8 +105,11 @@ class IrcSession:
         try:
             self.socket.connect((self.conf.server, self.conf.port))
 
-            self.socket.sendall("NICK %s\n" % self.conf.nick)
-            self.socket.sendall("USER %s 0 * :%s\n" % (self.conf.user, self.conf.name))
+            if (self.conf.ssl_enabled):
+                self.ssl_socket = socket.ssl(self.socket)
+
+            self.send("NICK %s\n" % self.conf.nick)
+            self.send("USER %s 0 * :%s\n" % (self.conf.user, self.conf.name))
 
             #TODO: wait for event 376`
             time.sleep(10)

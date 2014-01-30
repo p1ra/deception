@@ -36,6 +36,8 @@ class BotConf:
     user = "u-decept"
     name = "n-decept"
 
+    ssl_enabled = False;
+
     control_list = []
 
     plugins = ['core','notify',]
@@ -67,6 +69,8 @@ class BotConf:
             self.name = conf.get('General','name')
             self.nick = conf.get('General','nick')
 
+            self.ssl_enabled = conf.getboolean('General','ssl_enabled')
+
             self.control_list = conf.get('General','control_list').split(',')
             self.plugins = conf.get('General','plugins').split(',')
 
@@ -95,6 +99,7 @@ class BotConf:
         conf.set('General','user',self.user)
         conf.set('General','name',self.name)
         conf.set('General','nick',self.nick)
+        conf.set('General','ssl_enabled',str(self.ssl_enabled))
         conf.set('General','control_list',','.join(self.control_list))
         conf.set('General','plugins',','.join(self.plugins))
 
